@@ -363,6 +363,26 @@
       font-size: 22px
     }
 
+    .file .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #22346f;
+      background: #0c1435
+    }
+
+    .file .avatar i {
+      color: #9fb0d6;
+      font-size: 20px
+    }
+
+    .file .title {
+      color: #9fb0d6;
+      font-weight: 600
+    }
+
     .crumbs {
       display: flex;
       gap: 8px;
@@ -1027,7 +1047,31 @@
       let rel = String(item.rel || '').replace(/^[\\/]+/, '').replace(/\\/g, '/');
       rel = rel.split('/').map(encodeURIComponent).join('/');
       const pattern = (CONFIG.launch && CONFIG.launch.pattern) || 'http://localhost/{rel}/';
-      return pattern.replace('{rel}', rel);
+
+      if (item.type === 'file') {
+        const base = pattern.includes('{rel}') ?
+          pattern.replace('{rel}', rel) :
+          'http://localhost/' + rel;
+        return base.replace(/\/+$/, '');
+      } else {
+        const url = pattern.replace('{rel}', rel);
+        return url.endsWith('/') ? url : (url + '/');
+      }
+    }
+
+    function fileIconByExt(name) {
+      const ext = (name.split('.').pop() || '').toLowerCase();
+      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ico'].includes(ext)) return 'fa-regular fa-file-image';
+      if (['mp4', 'mov', 'webm', 'mkv', 'avi'].includes(ext)) return 'fa-regular fa-file-video';
+      if (['mp3', 'wav', 'ogg', 'flac', 'm4a'].includes(ext)) return 'fa-regular fa-file-audio';
+      if (['zip', 'rar', '7z', 'gz', 'tar'].includes(ext)) return 'fa-solid fa-file-zipper';
+      if (['pdf'].includes(ext)) return 'fa-regular fa-file-pdf';
+      if (['doc', 'docx', 'odt', 'rtf'].includes(ext)) return 'fa-regular fa-file-word';
+      if (['xls', 'xlsx', 'ods', 'csv'].includes(ext)) return 'fa-regular fa-file-excel';
+      if (['ppt', 'pptx', 'odp'].includes(ext)) return 'fa-regular fa-file-powerpoint';
+      if (['html', 'htm'].includes(ext)) return 'fa-regular fa-file-code';
+      if (['php', 'js', 'ts', 'css', 'scss', 'json', 'xml', 'yml', 'md', 'ini', 'env', 'py', 'rb', 'go', 'java', 'c', 'cpp', 'cs'].includes(ext)) return 'fa-regular fa-file-code';
+      return 'fa-regular fa-file-lines';
     }
 
     async function loadDir(rel = '') {
@@ -1061,27 +1105,48 @@
       plList.innerHTML = '';
       let count = 0;
       (res.items || []).forEach(it => {
-        if (it.type !== 'dir') return;
         count++;
-        const row = document.createElement('div');
-        row.className = 'pl-item';
+        const isDir = it.type === 'dir';
         const launchUrl = buildLaunchUrl(it);
-        row.innerHTML = `
-      <div class="folder" data-act="open" style="cursor:pointer;">
-        <button class="btn btn-icon" title="Buka Direktori" data-act="open"><i class="fa-solid fa-folder-open"></i></button>
-        <div>
-          <div class="title">${esc(it.name)}</div>
-          <div class="hint">${it.hasChildren ? 'berisi sub-direktori' : 'kosong / hanya file'}</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; margin-left:auto;">
-        <button class="btn btn-icon" title="Jalankan Aplikasi" data-act="play"><i class="fa-solid fa-play"></i></button>
-      </div>`;
-        row.querySelector('[data-act="open"]').addEventListener('click', () => loadDir(it.rel));
-        row.querySelector('[data-act="play"]').addEventListener('click', () => window.open(launchUrl, '_self'));
+
+        const row = document.createElement('div');
+        row.className = 'pl-item ' + (isDir ? 'dir' : 'file');
+
+        if (isDir) {
+          row.innerHTML = `
+          <div class="folder" data-act="open" style="cursor:pointer;">
+            <button class="btn btn-icon" title="Buka Direktori" data-act="open"><i class="fa-solid fa-folder-open"></i></button>
+            <div>
+              <div class="title">${esc(it.name)}</div>
+              <div class="hint">${it.hasChildren ? 'berisi sub-direktori' : 'folder'}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-left:auto;">
+            <button class="btn btn-icon" title="Play" data-act="play"><i class="fa-solid fa-play"></i></button>
+          </div>`;
+          // row.querySelectorAll('.btn')[0].addEventListener('click', () => window.open(launchUrl, '_self'));
+          // row.querySelectorAll('.btn')[1].addEventListener('click', () => loadDir(it.rel));
+
+          row.querySelector('[data-act="open"]').addEventListener('click', () => loadDir(it.rel));
+          row.querySelector('[data-act="play"]').addEventListener('click', () => window.open(launchUrl, '_self'));
+        } else {
+          const icon = fileIconByExt(it.name);
+          row.innerHTML = `
+          <div class="file" data-act="play" style="display:flex; gap:10px; align-items:center; cursor:pointer;">
+            <div class="avatar"><i class="${icon}"></i></div>
+            <div>
+              <div class="title">${esc(it.name)}</div>
+              <div class="hint">file</div>
+            </div>
+          </div>`;
+          // row.querySelector('.btn').addEventListener('click', () => window.open(launchUrl, '_self'));
+          row.querySelector('[data-act="play"]').addEventListener('click', () => window.open(launchUrl, '_self'));
+        }
+
         plList.appendChild(row);
       });
-      badgeApps.textContent = count + ' folder';
+      badgeApps.textContent = count + ' item';
+
     }
 
     // bootstrap
