@@ -5,6 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" id="icon" type="image/x-icon" href="">
   <title>Qohwah.id</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -698,6 +699,7 @@
 
   <script>
     const $ = (s, r = document) => r.querySelector(s);
+    const icon = $('#icon');
     const gridTop = $('#grid-top'),
       plList = $('#pl-list'),
       crumbs = $('#crumbs');
@@ -797,6 +799,7 @@
     // UI
     function renderFromConfig() {
       const c = CONFIG;
+      icon.href = c.logoImg || 'https://qohwah.id/favicon.ico';
       brandName.textContent = c.title || 'Qohwah.id';
       brandSub.textContent = c.subtitle || 'Smart Digital Solutions';
       setAccent(c.accent || '#00E5FF');
