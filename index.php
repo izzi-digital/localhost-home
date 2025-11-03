@@ -400,17 +400,34 @@
     }
 
     .dlg-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px;
+      padding: 16px 18px;
+      background: linear-gradient(180deg, #0b1536, #0a1230);
       border-bottom: 1px solid #182a60;
-      background: linear-gradient(180deg, #0b1536, #0a1230)
     }
 
     .dlg-body {
-      padding: 16px;
-      overflow: auto
+      padding: 16px 18px;
+      overflow: auto;
+      /* max-height: calc(86vh - 120px); */
+    }
+
+    .dlg-foot {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      padding: 12px 18px;
+      background: linear-gradient(0deg, #0b1536, #0a1230);
+      border-top: 1px solid #182a60;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      align-items: center;
     }
 
     .form-grid {
@@ -429,19 +446,49 @@
     input[type="text"],
     input[type="url"],
     input[type="color"],
-    textarea {
+    input[type="file"],
+    textarea,
+    table input[type="text"],
+    table input[type="url"] {
       width: 100%;
       padding: 10px 12px;
       border-radius: 12px;
-      border: 1px solid #2a3a78;
-      background: #0b1330;
+      border: 1px solid #25346b;
+      background: linear-gradient(180deg, #0b1330, #0a1128);
       color: var(--text);
-      font-size: 14px
+      font-size: 14px;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .05s ease;
+      box-shadow: inset 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0);
     }
 
-    input[type="file"] {
-      display: block;
-      width: 100%
+    input[type="color"] {
+      height: 40px;
+      padding: 0 6px;
+      border-radius: 12px;
+      background: #0b1330;
+      cursor: pointer;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8ea2d7
+    }
+
+    input[type="text"]:hover,
+    input[type="url"]:hover,
+    textarea:hover {
+      border-color: #3450aa;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    input[type="color"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+      background: #0b1336;
+      transform: translateY(-1px);
     }
 
     table {
@@ -461,6 +508,26 @@
     th {
       text-align: left;
       color: #a8b6e4
+    }
+
+    #tbl-top td,
+    #tbl-rem td {
+      vertical-align: middle
+    }
+
+    #tbl-top input,
+    #tbl-rem input {
+      margin: 6px 0
+    }
+
+    .btn.primary {
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 22%, #0b1540), #0b1540);
+      border-color: color-mix(in srgb, var(--accent) 45%, #2b3f8a);
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 8px 24px #0008, 0 0 16px color-mix(in srgb, var(--accent) 35%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 70%, #3a59cc);
     }
 
     .actions {
@@ -540,11 +607,15 @@
   <!-- DIALOG: OPTION -->
   <dialog id="dlg-option">
     <div class="dlg-head">
-      <div><b>Option</b>
+      <div>
+        <b style="font-size: x-large;">Option</b>
         <div style="font-size:12px;color:#9fb0d1">Brand, warna, banner/logo, shortcuts, reminders, root proyek, launch pattern</div>
       </div>
-      <div class="actions"><button class="btn" id="btn-close-opt">Tutup</button></div>
+      <div class="actions">
+        <button class="btn" id="btn-close-opt">Tutup</button>
+      </div>
     </div>
+
     <div class="dlg-body">
       <div class="form-grid">
         <div><label>Title</label><input id="opt-title" type="text" placeholder="Qohwah.id"></div>
@@ -560,7 +631,7 @@
         <div><label>Logo Teks (fallback)</label><input id="opt-logo-text" type="text" placeholder="Q"></div>
 
         <div>
-          <label>Logo</label>
+          <label>Logo PNG</label>
           <input id="opt-logo-file" type="file" accept="image/png,image/*">
           <button class="btn" id="btn-clear-logo" style="margin-top:6px">Hapus Logo</button>
         </div>
@@ -568,7 +639,7 @@
         <div style="grid-column:1/-1"><label>Projects Root (absolute/relative)</label><input id="opt-root" type="text" placeholder="C:\laragon\www"></div>
 
         <div style="grid-column:1/-1">
-          <label>Launch Pattern (pakai {rel})</label>
+          <label>Launch Pattern</label>
           <input id="opt-launch-pattern" type="text" placeholder="http://localhost/{rel}/">
           <div style="font-size:12px;color:#9fb0d6;margin-top:4px">
             <b>{rel}</b> = path relatif penuh dari root. Contoh: qohwah/landingpage ⇒ http://localhost/<b>qohwah/landingpage</b>/
@@ -588,7 +659,7 @@
         </thead>
         <tbody></tbody>
       </table>
-      <div class="actions"><button class="btn" id="add-top">Tambah Shortcuts</button></div>
+      <div class="actions"><button class="btn" id="add-top">Tambah Shortcut</button></div>
 
       <h3>Reminders (Pengingat)</h3>
       <table id="tbl-rem">
@@ -601,11 +672,13 @@
         <tbody></tbody>
       </table>
       <div class="actions"><button class="btn" id="add-rem">Tambah Pengingat</button></div>
+    </div>
 
-      <div class="actions">
-        <button class="btn" id="btn-save">Simpan</button>
-        <button class="btn danger" id="btn-reload">Reload dari JSON</button>
-      </div>
+    <div class="dlg-foot">
+      <button class="btn danger" id="btn-reload" title="Reload dari JSON">Reload</button>
+      <button class="btn primary" id="btn-save" title="Simpan ke config.json">
+        <i class="fa-solid fa-floppy-disk"></i>
+      </button>
     </div>
   </dialog>
 
@@ -765,12 +838,12 @@
       (c.topApps || []).forEach((app, i) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-      <td><input data-k="icon" data-i="${i}" value="${esc(app.icon||'fa-solid fa-link')}" placeholder="fa-solid fa-link"></td>
-      <td><input data-k="title" data-i="${i}" value="${esc(app.title||'')}" placeholder="Judul"></td>
-      <td><input data-k="url" data-i="${i}" value="${esc(app.url||'')}" placeholder="https://"></td>
-      <td><button class="btn" data-act="up" data-i="${i}">Naik</button>
-          <button class="btn" data-act="down" data-i="${i}">Turun</button>
-          <button class="btn danger" data-act="del" data-i="${i}">Hapus</button></td>`;
+      <td><input type="text" data-k="icon" data-i="${i}" value="${esc(app.icon||'fa-solid fa-link')}" placeholder="fa-solid fa-link"></td>
+      <td><input type="text" data-k="title" data-i="${i}" value="${esc(app.title||'')}" placeholder="Judul"></td>
+      <td><input type="text" data-k="url" data-i="${i}" value="${esc(app.url||'')}" placeholder="https://"></td>
+      <td><button class="btn" data-act="up" data-i="${i}"><i class="fas fa-angle-up"></i></button>
+          <button class="btn" data-act="down" data-i="${i}"><i class="fas fa-angle-down"></i></button>
+          <button class="btn danger" data-act="del" data-i="${i}"><i class="fas fa-trash-can"></i></button></td>`;
         tblTop.appendChild(tr);
       });
 
@@ -778,8 +851,8 @@
       tblRem.innerHTML = '';
       (c.reminders || []).forEach((msg, i) => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><input data-rem="msg" data-i="${i}" value="${esc(msg)}" placeholder="Tulis pengingat..."></td>
-                    <td><button class="btn danger" data-remact="del" data-i="${i}">Hapus</button></td>`;
+        tr.innerHTML = `<td><input type="text" data-rem="msg" data-i="${i}" value="${esc(msg)}" placeholder="Tulis pengingat..."></td>
+                    <td><button class="btn danger" data-remact="del" data-i="${i}"><i class="fas fa-trash-can"></i></button></td>`;
         tblRem.appendChild(tr);
       });
     }
