@@ -26,6 +26,7 @@
       --accent: #00E5FF;
       --accent2: #7C3AED;
       --radius: 18px;
+      --headerH: 80px;
     }
 
     * {
@@ -151,6 +152,12 @@
       box-shadow: inset 0 0 10px #0b1c55;
     }
 
+    .main-viewport,
+    .layout {
+      height: calc(100vh - var(--headerH));
+      min-height: calc(100vh - var(--headerH));
+    }
+
     .layout {
       display: grid;
       grid-template-columns: minmax(520px, 2fr) minmax(420px, 1fr);
@@ -164,14 +171,31 @@
       }
     }
 
+    section.primary {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 0;
+    }
+
     .hero {
+      flex: 0 0 auto;
+      height: clamp(260px, 38vh, 460px);
+      min-height: unset;
+      /* min-height: 420px; */
       position: relative;
-      min-height: 420px;
       border-radius: 22px;
       overflow: hidden;
       border: 1px solid #1a2f6a;
       box-shadow: 0 30px 120px #0008;
       transition: transform .15s ease, box-shadow .30s ease, border-color .15s ease;
+    }
+
+    .shortcuts-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .banner {
@@ -228,7 +252,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 16px 6px 10px
+      margin: 10px 6px 8px
     }
 
     .section-title h3 {
@@ -245,9 +269,31 @@
       grid-template-columns: repeat(auto-fill, minmax(190px, 1fr))
     }
 
+    .grid#grid-top {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: visible;
+      padding-top: 8px;
+      padding-right: 4px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      /* max-height: clamp(360px, 48vh, 520px); */
+    }
+
+    .shortcuts-scroller {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      padding: 8px 4px 4px;
+      /* headroom kecil biar hover ke atas nggak kepotong */
+    }
+
     .card {
       text-decoration: none;
       position: relative;
+      z-index: 0;
+      will-change: transform;
       overflow: hidden;
       border-radius: 16px;
       background: linear-gradient(180deg, #0b1535, #0a1129);
@@ -267,7 +313,8 @@
     }
 
     .card:hover {
-      transform: translateY(-3px);
+      z-index: 2;
+      transform: translateY(4px);
       box-shadow: 0 8px 24px #0008, 0 0 20px var(--accent2);
       /* box-shadow: 0 14px 40px #3450aa; */
       border-color: #3450aa
@@ -285,7 +332,7 @@
     }
 
     .thumb i {
-      font-size: 64px;
+      font-size: 56px;
       color: var(--accent);
       filter: drop-shadow(0 0 18px #00e5ff55)
     }
@@ -312,8 +359,8 @@
       border-radius: 22px;
       padding: 16px;
       position: sticky;
-      top: 80px;
-      max-height: calc(100vh - 120px);
+      top: calc(var(--headerH) + 8px);
+      max-height: calc(100vh - var(--headerH) - 16px);
       overflow: auto;
       box-shadow: 0 30px 120px #0007;
     }
@@ -593,26 +640,27 @@
   </header>
 
   <main class="layout">
-    <section>
+    <section class="primary">
       <a href="https://qohwah.id" style="text-decoration: none; color: inherit">
         <div class="hero">
           <div class="banner" id="banner"></div>
           <div class="gloss"></div>
           <div class="hero-content">
-            <div>
-              <span class="kpi" id="badge-updated">Terakhir diubah: —</span>
-            </div>
             <h1 id="hero-title">Solusi Pintar untuk Dunia Digital</h1>
             <div class="desc" id="hero-desc">Apakah Teknologi yang semakin Pintar akan membuat Manusia juga semakin Pintar?</div>
           </div>
         </div>
       </a>
 
-      <div class="section-title">
-        <h3>Shortcuts</h3>
-        <span class="kpi" id="badge-tools">0 Tools</span>
+      <div class="shortcuts-wrap">
+        <div class="section-title">
+          <h3>Shortcuts</h3>
+          <span class="kpi" id="badge-tools">0 Tools</span>
+        </div>
+        <div class="shortcuts-scroller">
+          <div class="grid" id="grid-top"></div>
+        </div>
       </div>
-      <div class="grid" id="grid-top"></div>
     </section>
 
     <aside class="playlist">
@@ -718,6 +766,15 @@
   </dialog>
 
   <script>
+    function updateHeaderHeightVar() {
+      const h = document.querySelector('header')?.offsetHeight || 80;
+      document.documentElement.style.setProperty('--headerH', h + 'px');
+    }
+    window.addEventListener('load', updateHeaderHeightVar);
+    window.addEventListener('resize', updateHeaderHeightVar);
+    new ResizeObserver(updateHeaderHeightVar).observe(document.querySelector('header'));
+    updateHeaderHeightVar();
+
     const $ = (s, r = document) => r.querySelector(s);
     const icon = $('#icon');
     const gridTop = $('#grid-top'),
@@ -728,8 +785,7 @@
       logo = $('#logo'),
       banner = $('#banner');
     const badgeApps = $('#badge-apps'),
-      badgeTools = $('#badge-tools'),
-      badgeUpdated = $('#badge-updated');
+      badgeTools = $('#badge-tools');
     const dlgOpt = $('#dlg-option'),
       dlgRem = $('#dlg-reminder');
 
@@ -826,7 +882,6 @@
       logo.innerHTML = c.logoImg ? `<img alt="logo" src="${esc(c.logoImg)}">` : esc((c.logoText || 'Q').slice(0, 3).toUpperCase());
       banner.style.backgroundImage = c.banner ? `url(${esc(c.banner)})` : 'none';
       badgeTools.textContent = (c.topApps?.length || 0) + ' Tools';
-      badgeUpdated.textContent = 'Terakhir diubah: ' + new Date((c.updatedAt || Date.now()) * 1000).toLocaleString('id-ID');
 
       // Shortcuts
       gridTop.innerHTML = '';
